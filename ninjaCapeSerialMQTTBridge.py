@@ -70,7 +70,7 @@ def on_message(client, userdata, message):
 def cleanup(ser, mqttc):
     print "Ending and cleaning up"
     ser.close()
-    mqttc.disconnect()
+    mqttc.loop_stop()
 
 def mqtt_to_JSON_output(mqtt_message):
     topics = mqtt_message.topic.split('/');
@@ -94,7 +94,7 @@ def serial_read_and_publish(ser, mqttc):
             print "json decoded:",json_data
 
         try:
-            device = str( json_data['DEVICE'][0]['D'] ) + str( json_data['DEVICE'][0]['G'] )
+            device = str( json_data['DEVICE'][0]['D'] ) + "_" + str( json_data['DEVICE'][0]['G'] )
             data = str( json_data['DEVICE'][0]['DA'] )
             mqttc.publish("ninjaCape/input/"+device, data)
         except(KeyError):
