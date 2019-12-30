@@ -15,6 +15,7 @@ import os
 import json
 import threading
 import time
+import subprocess
 
 ### Settings
 serialdev = '/dev/ttyO1' # for BBB
