@@ -23,7 +23,7 @@ serialdev = '/dev/ttyO1' # for BBB
 broker = "10.0.0.57" # mqtt broker
 port = 1883 # mqtt broker port
 
-debug = False  ## set this to True for lots of prints
+debug = True  ## set this to True for lots of prints
 
 # buffer of data to output to the serial port
 outputData = []
