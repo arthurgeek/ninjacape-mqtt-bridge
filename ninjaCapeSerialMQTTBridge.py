@@ -67,7 +67,7 @@ def on_message(client, userdata, message):
 
 #called on exit
 #close serial, disconnect MQTT
-def cleanup():
+def cleanup(ser, mqttc):
 	print "Ending and cleaning up"
 	ser.close()
 	mqttc.disconnect()
@@ -75,7 +75,8 @@ def cleanup():
 def mqtt_to_JSON_output(mqtt_message):
 	topics = mqtt_message.topic.split('/');
 	## JSON message in ninjaCape form
-	json_data = '{"DEVICE": [{"G":"0","V":0,"D":' + topics[2] + ',"DA":"' + mqtt_message.payload + '"}]})'
+	#json_data = '{"DEVICE": [{"G":"0","V":0,"D":' + topics[2] + ',"DA":"' + mqtt_message.payload + '"}]})'
+    json_data = '{"DEVICE": [{"G":"0","V":0,"D":' + str(topics[2]) + ',"DA":"' + str(mqtt_message.payload) + '"}]})'
 	return json_data
 
 #thread for reading serial data and publishing to MQTT client
@@ -155,10 +156,10 @@ def main():
     # handle app closure
     except (KeyboardInterrupt):
         print "Interrupt received"
-        cleanup()
+        cleanup(ser, mqttc)
     except (RuntimeError):
         print "uh-oh! time to die"
-        cleanup()
+        cleanup(ser, mqttc)
 
 if __name__ == "__main__":
     main()
