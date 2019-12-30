@@ -39,67 +39,67 @@ outputData = []
  
 ####  MQTT callbacks
 def on_connect(client, userdata, flags, rc):
-	if rc == 0:
-	#rc 0 successful connect
-		print "Connected"
-	else:
-		raise Exception
-	#subscribe to the output MQTT messages
-	output_mid = client.subscribe("ninjaCape/output/#")
+    if rc == 0:
+    #rc 0 successful connect
+        print "Connected"
+    else:
+        raise Exception
+    #subscribe to the output MQTT messages
+    output_mid = client.subscribe("ninjaCape/output/#")
  
 def on_publish(client, userdata, mid):
-	if(debug):
-		print "Published. mid:", mid
+    if(debug):
+        print "Published. mid:", mid
 
 def on_subscribe(client, userdata, mid, granted_qos):
-	if(debug):
-		print "Subscribed. mid:", mid
+    if(debug):
+        print "Subscribed. mid:", mid
 
 def on_message_output(client, userdata, msg):
-	if(debug):
-		print "Output Data: ", msg.topic, "data:", msg.payload
-	#add to outputData list
-	outputData.append(msg)
+    if(debug):
+        print "Output Data: ", msg.topic, "data:", msg.payload
+    #add to outputData list
+    outputData.append(msg)
 
 def on_message(client, userdata, message):
-	if(debug):
-		print "Unhandled Message Received: ", message.topic, message.paylod		
+    if(debug):
+        print "Unhandled Message Received: ", message.topic, message.paylod     
 
 #called on exit
 #close serial, disconnect MQTT
 def cleanup(ser, mqttc):
-	print "Ending and cleaning up"
-	ser.close()
-	mqttc.disconnect()
+    print "Ending and cleaning up"
+    ser.close()
+    mqttc.disconnect()
 
 def mqtt_to_JSON_output(mqtt_message):
-	topics = mqtt_message.topic.split('/');
-	## JSON message in ninjaCape form
-	#json_data = '{"DEVICE": [{"G":"0","V":0,"D":' + topics[2] + ',"DA":"' + mqtt_message.payload + '"}]})'
+    topics = mqtt_message.topic.split('/');
+    ## JSON message in ninjaCape form
+    #json_data = '{"DEVICE": [{"G":"0","V":0,"D":' + topics[2] + ',"DA":"' + mqtt_message.payload + '"}]})'
     json_data = '{"DEVICE": [{"G":"0","V":0,"D":' + str(topics[2]) + ',"DA":"' + str(mqtt_message.payload) + '"}]})'
-	return json_data
+    return json_data
 
 #thread for reading serial data and publishing to MQTT client
 def serial_read_and_publish(ser, mqttc):
-	ser.flushInput()
+    ser.flushInput()
 
-	while True:
-		line = ser.readline() # this is blocking
-		if(debug):
-			print "line to decode:",line
-		
-		# split the JSON packet up here and publish on MQTT
-		json_data = json.loads(line)
-		if(debug):
-			print "json decoded:",json_data
+    while True:
+        line = ser.readline() # this is blocking
+        if(debug):
+            print "line to decode:",line
+        
+        # split the JSON packet up here and publish on MQTT
+        json_data = json.loads(line)
+        if(debug):
+            print "json decoded:",json_data
 
-		try:
-			device = str( json_data['DEVICE'][0]['D'] ) + str( json_data['DEVICE'][0]['G'] )
-			data = str( json_data['DEVICE'][0]['DA'] )
-			mqttc.publish("ninjaCape/input/"+device, data)
-		except(KeyError):
-			# TODO should probably do something here if the data is malformed
-			pass
+        try:
+            device = str( json_data['DEVICE'][0]['D'] ) + str( json_data['DEVICE'][0]['G'] )
+            data = str( json_data['DEVICE'][0]['DA'] )
+            mqttc.publish("ninjaCape/input/"+device, data)
+        except(KeyError):
+            # TODO should probably do something here if the data is malformed
+            pass
 
 ############ MAIN PROGRAM START
 def main():
