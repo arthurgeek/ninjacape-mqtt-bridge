@@ -107,7 +107,7 @@ def main():
             print "Setting up UART pins"
             for pin in uart_pins:
                 command = "config-pin {} uart".format(pin)
-                print(" running: {}".format(command)
+                print(" running: {}".format(command))
                 subprocess.check_call(command, shell=True)
     except:
         print "Failed to configure pins of serial as uart"
