@@ -1,13 +1,13 @@
 #!/usr/bin/python
 #
-# used to interface the NinjaCape to openHAB via MQTT
+# used to interface the NinjaCape to home assistant via MQTT
 # - reads data from serial port and publishes on MQTT client
 # - writes data to serial port from MQTT subscriptions
 #
 # - uses the Python MQTT client from the Mosquitto project http://mosquitto.org (now in Paho)
 #
-# https://github.com/perrin7/ninjacape-mqtt-bridge
-# perrin7
+# https://github.com/tazard/ninjacape-mqtt-bridge
+# perrin7, edits by tazard 2019-12-30
  
 import serial
 import paho.mqtt.client as mqtt
@@ -20,7 +20,7 @@ import time
 serialdev = '/dev/ttyO1' # for BBB
 # serialdev = '/dev/ttyAMA0' # for RPi
 
-broker = "127.0.0.1" # mqtt broker
+broker = "10.0.0.57" # mqtt broker
 port = 1883 # mqtt broker port
 
 debug = False  ## set this to True for lots of prints
@@ -84,7 +84,7 @@ def serial_read_and_publish(ser, mqttc):
 			print "json decoded:",json_data
 
 		try:
-			device = str( json_data['DEVICE'][0]['D'] )
+			device = str( json_data['DEVICE'][0]['D'] ) + str( json_data['DEVICE'][0]['G'] )
 			data = str( json_data['DEVICE'][0]['DA'] )
 			mqttc.publish("ninjaCape/input/"+device, data)
 		except(KeyError):
