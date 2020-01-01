@@ -146,16 +146,30 @@ def serial_read_and_publish(ser, mqtt):
         # split the JSON packet up here and publish on MQTT
         json_data = json.loads(line)
 
-        try:
-            device = str(json_data['DEVICE'][0]['D']) + "_" + str(json_data['DEVICE'][0]['G'])
-            message = str(json_data['DEVICE'][0]['DA'])
-        except KeyError as e:
-            print("Error while extracting device or message from received JSON data: {}".format(e))
+        if 'DEVICE' in json_data:
+            # Received device update
+            try:
+                device = str(json_data['DEVICE'][0]['D']) + "_" + str(json_data['DEVICE'][0]['G'])
+                message = str(json_data['DEVICE'][0]['DA'])
+            except KeyError as e:
+                print("Error while extracting device or message from received DEVICE JSON data: {}".format(e))
+            else:
+                # No exceptions - data ok
+                topic = "ninjaCape/input/" + device
+                print("Publishing MQTT: topic='{}', message='{}'".format(topic, message))
+                mqtt.publish(topic, message)
+        elif 'ACK' in json_data:
+            # Received ACK
+            # {"ACK":[{"G":"0","V":0,"D":1007,"DA":"FFFF00"}]}
+            try:
+                device = str(json_data['ACK'][0]['D']) + "_" + str(json_data['ACK'][0]['G'])
+                message = str(json_data['ACK'][0]['DA'])
+            except KeyError as e:
+                print("Error while extracting device or message from received ACK JSON data: {}".format(e))
+            else:
+                print("ACK from ninjaCape: device='{}', message='{}'".format(device, message))
         else:
-            # No exceptions - data ok
-            topic = "ninjaCape/input/" + device
-            print("Publishing MQTT: topic='{}', message='{}'".format(topic, message))
-            mqtt.publish(topic, message)
+            print("Unknown message type: {}".format(json_data))
 
 
 def main():
