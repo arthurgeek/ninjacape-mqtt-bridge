@@ -65,6 +65,8 @@ Device Type   Device
 1007          NinjaBlock Eyes
 ```
 
+Full list of device ids on the [web archive](https://web.archive.org/web/20160505082642/http://shop.ninjablocks.com/pages/device-ids)
+
 ## TODO List
 * Make it daemon-ised.  At the moment I'm just running it in a 'screen' instance.
 * Catch invalid JSON messages and throw an error, instead of just ignoring it.

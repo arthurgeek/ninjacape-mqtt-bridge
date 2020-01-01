@@ -11,6 +11,8 @@ Uses the Python MQTT client from the Mosquitto project http://mosquitto.org (now
 
 https://github.com/tazard/ninjacape-mqtt-bridge
 
+Git clone to `/usr/local/lib/ninjacape-mqtt-bridge` on linux host (BBB)
+
 Originally by perrin7
 Reworked by tazard 2019-12-30
 """
