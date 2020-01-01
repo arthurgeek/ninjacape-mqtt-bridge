@@ -44,7 +44,7 @@ config_path = 'config.json'
 # ]
 
 debug = True  # Debug printing
-dummy_serial = True  # Fake serial for testing
+dummy_serial = False  # Fake serial for testing
 
 # buffer of data to output to the serial port
 outputData = []
@@ -125,8 +125,9 @@ def cleanup(ser, mqtt):
 def mqtt_to_json_output(mqtt_message):
     """convert mqtt_message into a json string for ninja cape serial"""
     topics = mqtt_message.topic.split('/')
+    data = mqtt_message.payload.decode()
     # JSON message in ninjaCape form
-    json_data = '{"DEVICE": [{"G":"0","V":0,"D":' + str(topics[2]) + ',"DA":"' + str(mqtt_message.payload) + '"}]})'
+    json_data = '{"DEVICE": [{"G":"0","V":0,"D":' + str(topics[2]) + ',"DA":"' + data + '"}]})'
     return json_data
 
 
@@ -140,7 +141,7 @@ def serial_read_and_publish(ser, mqtt):
         if debug:
             print()
             cleaned_line = line.replace('\r', '').replace('\n', '')
-            print("Received from ninja cape: {}".format(cleaned_line))
+            print("Received from ninja cape:\n{}".format(cleaned_line))
 
         # split the JSON packet up here and publish on MQTT
         json_data = json.loads(line)
@@ -205,7 +206,9 @@ def main():
             # writing to serial port if there is data available
             if len(outputData) > 0:
                 # print "***data to OUTPUT:",mqtt_to_JSON_output(outputData[0])
-                ser.write(mqtt_to_json_output(outputData.pop()))
+                serial_message = mqtt_to_json_output(outputData.pop())
+                print("Sending this on serial:\n{}".format(serial_message))
+                ser.write(serial_message.encode())
 
             time.sleep(0.5)
 
