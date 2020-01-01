@@ -41,6 +41,7 @@ import json
 import subprocess
 import threading
 import time
+import argparse
 
 import paho.mqtt.client as mqtt
 import serial
@@ -180,7 +181,10 @@ def serial_read_and_publish(ser, mqtt):
 
 def main():
     # load config
-    config = Config(config_path)
+    arg_parser = argparse.ArgumentParser(description="Ninja Cape Serial to MQTT Bridge")
+    arg_parser.add_argument("config_path", help="Path to config file")
+    args = arg_parser.parse_args()
+    config = Config(args.config_path)
 
     if len(config.serial_uart_pins) > 0:
         print("Setting up UART pins")
