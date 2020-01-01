@@ -22,19 +22,20 @@ import paho.mqtt.client as mqtt
 import serial
 
 # Settings
-serial_dev_path = '/dev/ttyO1'  # for BBB
-# serial_dev_path = '/dev/ttyAMA0' # for RPi
-
-broker = "hassio"  # mqtt broker
-port = 1883  # mqtt broker port
-
-# Pins for serial UART 
-# (on BBB A5C with 2019-08 image requires these to be set)
-# Set to empty list if no pins need to be configured on your platform
-uart_pins = [
-    # "P9.26",
-    # "P9.24",
-]
+config_path = 'config.json'
+# serial_dev_path = '/dev/ttyO1'  # for BBB
+# # serial_dev_path = '/dev/ttyAMA0' # for RPi
+#
+# broker = "hassio"  # mqtt broker
+# port = 1883  # mqtt broker port
+#
+# # Pins for serial UART
+# # (on BBB A5C with 2019-08 image requires these to be set)
+# # Set to empty list if no pins need to be configured on your platform
+# uart_pins = [
+#     # "P9.26",
+#     # "P9.24",
+# ]
 
 debug = True  # Debug printing
 dummy_serial = True  # Fake serial for testing
@@ -54,6 +55,24 @@ class FakeSerial:
 
     def write(self, message):
         pass
+
+    def close(self):
+        pass
+
+
+class Config:
+    def __init__(self, path):
+        """JSON config file for this script"""
+        with open(path, 'r') as f:
+            j = json.load(f)
+        self.j = j
+        self.mqtt_host = j['mqtt']['host']
+        self.mqtt_port = j['mqtt']['port']
+        self.mqtt_auth_enabled = j['mqtt']['auth']['enabled']
+        self.mqtt_auth_user = j['mqtt']['auth']['user']
+        self.mqtt_auth_pass = j['mqtt']['auth']['pass']
+        self.serial_path = j['serial']['path']
+        self.serial_uart_pins = j['serial']['uart_pins']
 
 
 def mqtt_on_connect(client, userdata, flags, rc):
@@ -111,9 +130,11 @@ def serial_read_and_publish(ser, mqtt):
 
     while True:
         line = ser.readline()  # this is blocking
+        line = line.decode()
         if debug:
             print()
-            print("Received from ninja cape:", line.replace('\r', '').replace('\n', ''))
+            cleaned_line = line.replace('\r', '').replace('\n', '')
+            print("Received from ninja cape: {}".format(cleaned_line))
 
         # split the JSON packet up here and publish on MQTT
         json_data = json.loads(line)
@@ -131,18 +152,21 @@ def serial_read_and_publish(ser, mqtt):
 
 
 def main():
-    if len(uart_pins) > 0:
+    # load config
+    config = Config(config_path)
+
+    if len(config.serial_uart_pins) > 0:
         print("Setting up UART pins")
-        for pin in uart_pins:
+        for pin in config.serial_uart_pins:
             command = "config-pin {} uart".format(pin)
             print(" running: {}".format(command))
             subprocess.check_call(command, shell=True)
 
     # Connect serial port
     if not dummy_serial:
-        print("Connecting... {}".format(serial_dev_path))
+        print("Connecting... {}".format(config.serial_path))
         # timeout 0 for non-blocking. Set to None for blocking.
-        ser = serial.Serial(serial_dev_path, 9600, timeout=None)
+        ser = serial.Serial(config.serial_path, 9600, timeout=None)
     else:
         ser = FakeSerial()
 
@@ -156,9 +180,10 @@ def main():
     mqtt_client.on_message = mqtt_on_unhandled_message
     mqtt_client.message_callback_add("ninjaCape/output/#", mqtt_on_ninja_cape_output)
 
-    # connect to broker
-    mqtt_client.username_pw_set("MQTT_user", "-")
-    mqtt_client.connect(broker, port, 60)
+    # connect to MQTT broker
+    if config.mqtt_auth_enabled:
+        mqtt_client.username_pw_set(config.mqtt_auth_user, config.mqtt_auth_pass)
+    mqtt_client.connect(config.mqtt_host, config.mqtt_port, 60)
 
     # Thread for MQTT client
     mqtt_client.loop_start()
