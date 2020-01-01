@@ -20,7 +20,7 @@ Environment=PYTHONUNBUFFERED=1
 Restart=on-failure
 
 # Use a dedicated user to run our service
-User=python_demo_service
+User=ninja_cape_mqtt_bridge_service
 
 
 [Install]
