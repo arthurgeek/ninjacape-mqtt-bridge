@@ -1,13 +1,19 @@
 #!/usr/bin/python
-#
-# used to interface the NinjaCape to home assistant via MQTT
-# - reads data from serial port and publishes on MQTT client
-# - writes data to serial port from MQTT subscriptions
-#
-# - uses the Python MQTT client from the Mosquitto project http://mosquitto.org (now in Paho)
-#
-# https://github.com/tazard/ninjacape-mqtt-bridge
-# perrin7, edits by tazard 2019-12-30
+"""
+Interface the NinjaCape to MQTT
+
+For use with Home Assistant or OpenHAB.
+
+ * reads data from serial port and publishes on MQTT client
+ * writes data to serial port from MQTT subscriptions
+
+Uses the Python MQTT client from the Mosquitto project http://mosquitto.org (now in Paho)
+
+https://github.com/tazard/ninjacape-mqtt-bridge
+
+Originally by perrin7
+Reworked by tazard 2019-12-30
+"""
 
 # TODO: Consider handling SIGTERM --
 #  https://stackoverflow.com/questions/18499497/how-to-process-sigterm-signal-gracefully
