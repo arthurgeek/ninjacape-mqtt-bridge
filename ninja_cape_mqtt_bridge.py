@@ -188,6 +188,7 @@ def main():
 
     # Connect serial port
     if not dummy_serial:
+        # TODO: Consider retry on serial
         print("Connecting... {}".format(config.serial_path))
         # timeout 0 for non-blocking. Set to None for blocking.
         ser = serial.Serial(config.serial_path, 9600, timeout=None)
@@ -207,6 +208,8 @@ def main():
     # connect to MQTT broker
     if config.mqtt_auth_enabled:
         mqtt_client.username_pw_set(config.mqtt_auth_user, config.mqtt_auth_pass)
+    # TODO: Add last will and testament so can monitor when this service is up from MQTT
+    # TODO: Consider retry on MQTT connection
     mqtt_client.connect(config.mqtt_host, config.mqtt_port, 60)
 
     # Thread for MQTT client
