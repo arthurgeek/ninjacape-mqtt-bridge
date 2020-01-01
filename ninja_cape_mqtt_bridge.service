@@ -10,7 +10,7 @@ Description=Ninja Cape MQTT Bridge Service
 [Service]
 
 # Command to execute when the service is started
-ExecStart=/usr/bin/python3 /usr/local/lib/ninjacape-mqtt-bridge/ninja_cape_mqtt_bridge.py
+ExecStart=/usr/bin/python3 /usr/local/lib/ninjacape-mqtt-bridge/ninja_cape_mqtt_bridge.py /usr/local/lib/ninjacape-mqtt-bridge/config.json
 
 # Disable Python's buffering of STDOUT and STDERR, so that output from the
 # service shows up immediately in systemd's logs
