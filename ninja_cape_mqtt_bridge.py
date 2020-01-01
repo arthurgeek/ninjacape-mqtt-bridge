@@ -14,19 +14,14 @@ https://github.com/tazard/ninjacape-mqtt-bridge
 Git clone to `/usr/local/lib/ninjacape-mqtt-bridge` on linux host (BBB)
 
 
-# serial_dev_path = '/dev/ttyO1'  # for BBB
-# # serial_dev_path = '/dev/ttyAMA0' # for RPi
-#
-# broker = "hassio"  # mqtt broker
-# port = 1883  # mqtt broker port
-#
-# # Pins for serial UART
-# # (on BBB A5C with 2019-08 image requires these to be set)
-# # Set to empty list if no pins need to be configured on your platform
-# uart_pins = [
-#     # "P9.26",
-#     # "P9.24",
-# ]
+Some notes on config:
+    serial_path = '/dev/ttyO1'  # for BBB
+    serial_path = '/dev/ttyAMA0' # for RPi
+
+    Pins for serial UART
+    (on BBB A5C with 2019-08 image requires these to be set)
+    Set to empty list if no pins need to be configured on your platform
+    uart_pins = "P9.26", "P9.24"
 
 
 Originally by perrin7
@@ -48,8 +43,6 @@ import serial
 
 
 # Settings
-config_path = 'config.json'
-
 debug = True  # Debug printing
 dummy_serial = False  # Fake serial for testing
 
