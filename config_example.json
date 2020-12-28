@@ -13,5 +13,8 @@
       "path_comment" : "`/dev/ttyO1` for BBB, `/dev/ttyAMA0` for RPi",
       "uart_pins" : [ "P9.26", "P9.24" ],
       "uart_pins_comment" : "On BBB A5C with Debian image 2019-08 requires P9.26 and P9.24 pins to be set as UART. Empty list will not set any pins."
+   },
+   "cape" : {
+      "disable_leds" : true
    }
 }

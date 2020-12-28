@@ -79,6 +79,7 @@ class Config:
         self.mqtt_auth_pass = j['mqtt']['auth']['pass']
         self.serial_path = j['serial']['path']
         self.serial_uart_pins = j['serial']['uart_pins']
+        self.cape_disable_leds = j['cape']['disable_leds']
 
 
 def mqtt_on_connect(client, userdata, flags, rc):
@@ -131,13 +132,14 @@ def mqtt_to_json_output(mqtt_message):
     return json_data
 
 
-def serial_read_and_publish(ser, mqtt):
+def serial_read_and_publish(ser, mqtt, config):
     """thread for reading serial data and publishing to MQTT client"""
     ser.flushInput()
 
     while True:
         line = ser.readline()  # this is blocking
         line = line.decode()
+
         if debug:
             print()
             cleaned_line = line.replace('\r', '').replace('\n', '')
@@ -156,7 +158,18 @@ def serial_read_and_publish(ser, mqtt):
             else:
                 # No exceptions - data ok
                 topic = "ninjaCape/input/" + device
-                print("Publishing MQTT: topic='{}', message='{}'".format(topic, message))
+
+                # ignore message from LEDs
+                if (config.cape_disable_leds):
+                    if (device == "999_0") or (device == "1007_0"):
+                        if(debug):
+                            print "ignoring message from LEDs"
+
+                        continue
+
+                if(debug):
+                    print("Publishing MQTT: topic='{}', message='{}'".format(topic, message))
+
                 mqtt.publish(topic, message)
         elif 'ACK' in json_data:
             # Received ACK
@@ -216,7 +229,7 @@ def main():
     mqtt_client.loop_start()
 
     # Thread for reading serial from ninja cape
-    serial_thread = threading.Thread(target=serial_read_and_publish, args=(ser, mqtt_client))
+    serial_thread = threading.Thread(target=serial_read_and_publish, args=(ser, mqtt_client, config))
     serial_thread.daemon = True
     serial_thread.start()
 
