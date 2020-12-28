@@ -80,6 +80,8 @@ class Config:
         self.serial_path = j['serial']['path']
         self.serial_uart_pins = j['serial']['uart_pins']
         self.cape_disable_leds = j['cape']['disable_leds']
+        self.cape_debounce = j['cape']['debounce']
+        self.cape_debounce_time = j['cape']['debounce_time']
 
 
 def mqtt_on_connect(client, userdata, flags, rc):
@@ -136,6 +138,9 @@ def serial_read_and_publish(ser, mqtt, config):
     """thread for reading serial data and publishing to MQTT client"""
     ser.flushInput()
 
+    lastMessage = ""
+    lastMessageTime = time.time()
+
     while True:
         line = ser.readline()  # this is blocking
         line = line.decode()
@@ -158,6 +163,7 @@ def serial_read_and_publish(ser, mqtt, config):
             else:
                 # No exceptions - data ok
                 topic = "ninjaCape/input/" + device
+                theTime = time.time()
 
                 # ignore message from LEDs
                 if (config.cape_disable_leds):
@@ -167,10 +173,21 @@ def serial_read_and_publish(ser, mqtt, config):
 
                         continue
 
+                if config.cape_debounce:
+                    # code to 'debounce' the inputs - maximum of one message per configured seconds from each device
+                    if (lastMessageTime + config.cape_debounce_time > theTime) and (lastMessage == device+message):
+                        if(debug):
+                            print "debouncing message"
+
+                            continue
+
                 if(debug):
                     print("Publishing MQTT: topic='{}', message='{}'".format(topic, message))
 
                 mqtt.publish(topic, message)
+                lastMessage = device+message
+                lastMessageTime = theTime
+
         elif 'ACK' in json_data:
             # Received ACK
             # {"ACK":[{"G":"0","V":0,"D":1007,"DA":"FFFF00"}]}
