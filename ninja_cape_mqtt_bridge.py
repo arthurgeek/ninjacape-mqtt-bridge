@@ -43,7 +43,7 @@ import serial
 
 
 # Settings
-debug = True  # Debug printing
+debug = False  # Debug printing
 dummy_serial = False  # Fake serial for testing
 
 # buffer of data to output to the serial port
